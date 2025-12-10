@@ -113,7 +113,6 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-        // IMPORTANT: I kept your API key, but switched the model to 'gemini-1.5-flash' which is more stable.
         const apiKey = "AIzaSyAHY9Fk6IgqbYLGshgAmaaZRf4QGTPk9SU"; 
 
         // --- ICON DEFINITIONS ---
@@ -152,9 +151,9 @@
         const MessageSquare = (props) => <IconBase {...props}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></IconBase>;
         const Calendar = (props) => <IconBase {...props}><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></IconBase>;
 
-        // --- GEMINI API HELPERS (ROBUST FALLBACK) ---
+        // --- GEMINI API HELPERS (FAIL-SAFE MODE) ---
         const callGemini = async (prompt, systemInstruction = "") => {
-            // 1. Try API First (using correct model)
+            // 1. Attempt Real API Call
             if (apiKey) {
                 try {
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
@@ -163,19 +162,20 @@
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemInstruction }] } })
                     });
                     const data = await response.json();
-                    
-                    // If API is successful, return text
+                    // If successful, return the data immediately
                     if (!data.error && data.candidates?.[0]?.content?.parts?.[0]?.text) {
                         return data.candidates[0].content.parts[0].text;
                     }
-                    console.warn("API Error (Switching to Sim):", data.error);
+                    // If error exists, log it and fall through to simulation
+                    console.warn("API Error detected (Switching to Simulation):", data.error);
                 } catch (error) { 
-                    console.warn("Network Error (Switching to Sim):", error);
+                    console.warn("Network Error (Switching to Simulation):", error);
                 }
             }
 
-            // 2. Fallback Simulation (Works if API key is invalid, over quota, or missing)
-            await new Promise(r => setTimeout(r, 1000)); // Fake network delay for realism
+            // 2. FALLBACK SIMULATION (Runs if API fails or is missing)
+            // This ensures the app ALWAYS provides content
+            await new Promise(r => setTimeout(r, 1000)); // Fake realistic delay
             
             if (prompt.includes("plan")) {
                 return "**7-Day Immunity Mastery Plan**\n\n* **Day 1:** Read about Skin & Mucous Membranes. (External Defense)\n* **Day 2:** Focus on Phagocytosis. Draw the diagram.\n* **Day 3:** Study the fever mechanism. Why is heat good?\n* **Day 4:** Deep dive: Specific Defense. B-Cells vs T-Cells.\n* **Day 5:** Antibodies & Antigens. Practice matching them.\n* **Day 6:** Vaccines & Antibiotics. Review differences.\n* **Day 7:** Final Mock Quiz. Rest well!";
@@ -205,6 +205,7 @@
         };
 
         const callGeminiJSON = async (prompt, schema) => {
+             // 1. Attempt Real API Call
              if (apiKey) {
                  try {
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
@@ -219,13 +220,13 @@
                     if (!data.error && data.candidates?.[0]?.content?.parts?.[0]?.text) {
                         return JSON.parse(data.candidates[0].content.parts[0].text);
                     }
-                    console.warn("API Error (Switching to Sim):", data.error);
+                    console.warn("API Error detected (Switching to Simulation):", data.error);
                 } catch (error) { 
-                    console.warn("Network Error (Switching to Sim):", error);
+                    console.warn("Network Error (Switching to Simulation):", error);
                 }
              }
 
-             // Fallback Simulation Data
+             // 2. FALLBACK SIMULATION (Runs if API fails)
              await new Promise(r => setTimeout(r, 1000));
              
              if (prompt.includes("flashcards")) {
