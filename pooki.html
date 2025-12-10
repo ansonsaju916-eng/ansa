@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SSLC Biology: Immunity Master Lab</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #F1F5F9; 
+            color: #334155;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* HIDE UNICORN STUDIO BADGE */
+        a[href*="unicorn.studio"], .us-brand, .us-logo {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* Smooth Transitions */
+        .transition-all-300 { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Card Styling */
+        .pro-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        /* Detail Box Styling */
+        .detail-box {
+            background-color: #F8FAFC;
+            border-left: 4px solid #6366F1;
+            padding: 12px 16px;
+            margin-top: 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .detail-title {
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* Animation Keyframes */
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .animate-pulse-soft { animation: pulse-soft 2s infinite; }
+        
+        @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slide-up 0.5s ease-out forwards; }
+
+        @keyframes phagocytosis {
+            0% { border-radius: 50%; transform: scale(1); }
+            30% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: scale(1.1) translateX(10px); }
+            60% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: scale(1.05) translateX(20px); }
+            100% { border-radius: 50%; transform: scale(1) translateX(0); }
+        }
+        .animate-phago { animation: phagocytosis 4s infinite ease-in-out; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const apiKey = "AIzaSyAHY9Fk6IgqbYLGshgAmaaZRf4QGTPk9SU"; 
+
+        // --- ICON DEFINITIONS ---
+        const IconBase = ({ children, size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+
+        const Shield = (props) => <IconBase {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></IconBase>;
+        const Droplets = (props) => <IconBase {...props}><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.8-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z" /><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.35" /></IconBase>;
+        const Zap = (props) => <IconBase {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></IconBase>;
+        const Skull = (props) => <IconBase {...props}><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /><path d="M8 20v2h8v-2" /><path d="m12.5 17-.5-1-.5 1h1z" /><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20" /></IconBase>;
+        const Microscope = (props) => <IconBase {...props}><path d="M6 18h8" /><path d="M3 22h18" /><path d="M14 22a7 7 0 1 0 0-14h-1" /><path d="M9 14h2" /><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" /><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" /></IconBase>;
+        const BookOpen = (props) => <IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></IconBase>;
+        const Activity = (props) => <IconBase {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></IconBase>;
+        const CheckCircle = (props) => <IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></IconBase>;
+        const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></IconBase>;
+        const Bot = (props) => <IconBase {...props}><path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></IconBase>;
+        const Leaf = (props) => <IconBase {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></IconBase>;
+        const Menu = (props) => <IconBase {...props}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></IconBase>;
+        const X = (props) => <IconBase {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></IconBase>;
+        const ChevronRight = (props) => <IconBase {...props}><path d="m9 18 6-6-6-6" /></IconBase>;
+        const ChevronDown = (props) => <IconBase {...props}><path d="m6 9 6 6 6-6" /></IconBase>;
+        const Thermometer = (props) => <IconBase {...props}><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" /></IconBase>;
+        const Heart = (props) => <IconBase {...props}><path d="M19 14c1.49-1.28 3.6-2.33 3.6-4.7 0-2.37-1.91-4.3-4.3-4.3-1.68 0-3.12 1.02-3.8 2.58l-.5.96-.5-.96C12.92 6.02 11.48 5 9.8 5 7.41 5 5.5 6.93 5.5 9.3c0 2.37 2.11 3.42 3.6 4.7l6.4 5.2z" /></IconBase>;
+        const FileText = (props) => <IconBase {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></IconBase>;
+        const Brain = (props) => <IconBase {...props}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" /><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" /></IconBase>;
+        const Flame = (props) => <IconBase {...props}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.2-2.2.6-3.3a1 1 0 0 1 1.4-.2z"/></IconBase>;
+        const Wand = (props) => <IconBase {...props}><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></IconBase>;
+
+        // --- GEMINI API HELPERS ---
+        const callGemini = async (prompt, systemInstruction = "") => {
+            if (!apiKey) return "⚠️ API Key missing. Simulation mode active.";
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemInstruction }] } })
+                });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "No data received.";
+            } catch (error) { return "Connection error."; }
+        };
+
+        const callGeminiJSON = async (prompt, schema) => {
+             if (!apiKey) return null;
+             try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { responseMimeType: "application/json", responseSchema: schema }
+                    })
+                });
+                const data = await response.json();
+                return JSON.parse(data.candidates[0].content.parts[0].text);
+            } catch (error) { return null; }
+        };
+
+        // --- UI COMPONENTS ---
+        const ModernBtn = ({ onClick, label, variant = "primary", disabled = false, icon: Icon, className = "" }) => {
+            const variants = {
+                primary: "bg-slate-900 text-white active:bg-slate-950 shadow-sm",
+                secondary: "bg-white text-slate-700 border border-slate-200 active:bg-slate-50",
+                accent: "bg-teal-600 text-white active:bg-teal-700 shadow-sm",
+                danger: "bg-rose-600 text-white active:bg-rose-700 shadow-sm",
+                indigo: "bg-indigo-600 text-white active:bg-indigo-700 shadow-sm",
+                ghost: "bg-transparent text-slate-500 active:text-slate-900"
+            };
+            return (
+                <button 
+                    onClick={onClick} 
+                    disabled={disabled} 
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+                >
+                    {Icon && <Icon size={18} />}
+                    {label}
+                </button>
+            );
+        };
+
+        const Badge = ({ children, color = "slate" }) => {
+            const colors = {
+                slate: "bg-slate-100 text-slate-700",
+                teal: "bg-teal-50 text-teal-700 border border-teal-100",
+                rose: "bg-rose-50 text-rose-700 border border-rose-100",
+                indigo: "bg-indigo-50 text-indigo-700 border border-indigo-100",
+                amber: "bg-amber-50 text-amber-700 border border-amber-100"
+            };
+            return <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[color]}`}>{children}</span>;
+        };
+
+        const DetailBox = ({ title, children, isOpen, toggle }) => (
+            <div className="mt-4">
+                <button onClick={toggle} className="w-full flex justify-between items-center text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-wide mb-2 py-2">
+                    {isOpen ? "Hide Textbook Details" : "Show Textbook Details"}
+                    {isOpen ? <X size={14}/> : <ChevronDown size={14}/>}
+                </button>
+                {isOpen && (
+                    <div className="detail-box animate-slide-up">
+                        <div className="detail-title"><BookOpen size={16}/> {title}</div>
+                        {children}
+                    </div>
+                )}
+            </div>
+        );
+
+        // --- LANDING PAGE COMPONENT ---
+        const LandingPage = ({ onEnter }) => {
+            useEffect(() => {
+                const scriptId = 'unicorn-studio-script';
+                if (!document.getElementById(scriptId)) {
+                    const script = document.createElement('script');
+                    script.id = scriptId;
+                    script.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js";
+                    script.onload = () => {
+                        if (window.UnicornStudio) window.UnicornStudio.init();
+                    };
+                    document.body.appendChild(script);
+                } else if (window.UnicornStudio) {
+                    window.UnicornStudio.init();
+                }
+            }, []);
+
+            return (
+                <div className="fixed inset-0 z-50 bg-[#EEEEEE] overflow-hidden flex flex-col items-center justify-center">
+                    {/* Main Animation Layer */}
+                    <div className="relative flex-shrink-0 flex items-center justify-center" style={{ width: '100%', height: '100%', maxWidth: '390px', maxHeight: '844px' }}>
+                        {/* Updated Embed Code */}
+                        <div data-us-project="b39Tb7y4XS6ib3UbvXAM" style={{ width: '100%', height: '100%' }}></div>
+                    </div>
+
+                    {/* Button Layer - Fixed at bottom */}
+                    <div className="absolute bottom-10 left-0 w-full flex justify-center z-10 px-4">
+                        <button 
+                            onClick={onEnter}
+                            className="group flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-full font-bold text-lg shadow-2xl hover:bg-slate-800 transition-all duration-300 animate-slide-up active:scale-95"
+                        >
+                            Get Started
+                            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- ZONE 1: EXTERNAL DEFENSE ---
+        const ZoneExternal = () => {
+            const [layer, setLayer] = useState(0); 
+            const [showDetails, setShowDetails] = useState(false);
+            
+            return (
+                <div className="space-y-6 animate-slide-up">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="pro-card p-6 relative">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+                                    <Shield size={20} className="text-teal-600"/> Skin Barrier
+                                </h3>
+                                <Badge color="teal">First Line</Badge>
+                            </div>
+                            <div className="relative h-48 rounded-xl overflow-hidden border border-slate-200 bg-orange-50 mb-4">
+                                <div className="absolute bottom-0 w-full h-1/2 bg-orange-200 border-t border-orange-300 flex items-center justify-center text-xs font-bold text-orange-800 opacity-50">DERMIS</div>
+                                <div className="absolute bottom-1/2 w-full h-12 bg-orange-300 border-t-4 border-orange-400 flex items-center justify-center text-xs font-bold text-orange-900 z-10">EPIDERMIS</div>
+                                <div className="absolute inset-0 z-20 pointer-events-none">
+                                    {layer === 1 && <div className="absolute top-4 left-1/2 -translate-x-1/2 text-center"><div className="text-xs font-bold text-slate-500 mb-1">Pathogen Blocked</div><div className="text-2xl animate-bounce">🛡️</div></div>}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <ModernBtn label="Test Keratin" variant="secondary" onClick={() => setLayer(1)} />
+                                <ModernBtn label="Test Sweat" variant="secondary" onClick={() => setLayer(2)} />
+                            </div>
+                        </div>
+                        <div className="pro-card p-6">
+                            <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><Droplets size={20} className="text-indigo-600"/> Chemical Defense</h3>
+                            <ul className="space-y-3">
+                                <li className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                    <div className="bg-white p-1.5 rounded shadow-sm text-indigo-600"><Zap size={16}/></div>
+                                    <div><div className="text-sm font-bold text-slate-800">Lysozyme</div><div className="text-xs text-slate-500">Tears & Saliva • Breaks cell walls</div></div>
+                                </li>
+                                <li className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                    <div className="bg-white p-1.5 rounded shadow-sm text-green-600"><Skull size={16}/></div>
+                                    <div><div className="text-sm font-bold text-slate-800">Hydrochloric Acid</div><div className="text-xs text-slate-500">Stomach • Destroys food germs</div></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div className="pro-card p-4">
+                        <DetailBox title="Detailed Study Notes: First Line of Defense" isOpen={showDetails} toggle={() => setShowDetails(!showDetails)}>
+                            <ul className="list-disc pl-5 space-y-2 text-slate-700">
+                                <li><strong>Skin (Epidermis):</strong> The outermost layer contains a tough, fibrous protein called <strong>Keratin</strong>. It acts as a waterproof physical barrier that prevents the entry of germs.</li>
+                                <li><strong>Sebum:</strong> An oily secretion from sebaceous glands. It keeps the skin waterproof and maintains a slightly acidic pH that discourages bacterial growth.</li>
+                                <li><strong>Sweat:</strong> Contains salts and disinfectants that wash away pathogens and inhibit their growth.</li>
+                                <li><strong>Commensal Bacteria:</strong> These are helpful bacteria living on our skin. They compete with harmful pathogens for space and nutrients, effectively starving the bad germs.</li>
+                                <li><strong>Mucous Membranes:</strong> Line the respiratory, digestive, and urinary tracts. <strong>Mucus</strong> traps dust and germs, while <strong>Cilia</strong> (hair-like structures) sweep the mucus out (cough reflex).</li>
+                            </ul>
+                        </DetailBox>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- ZONE 2: INTERNAL DEFENSE ---
+        const InflammationSimulator = () => {
+            const [injury, setInjury] = useState("");
+            const [response, setResponse] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            const simulate = async () => {
+                if (!injury) return;
+                setLoading(true);
+                const prompt = `Describe the body's inflammatory response to: "${injury}". Explain the role of Histamine, vasodilation, and phagocytes simply for a 10th grader. Keep it short.`;
+                const res = await callGemini(prompt);
+                setResponse(res);
+                setLoading(false);
+            };
+
+            return (
+                <div className="pro-card p-6 mt-6 bg-slate-50 border-2 border-indigo-100 animate-slide-up">
+                    <h3 className="font-bold text-lg text-indigo-900 mb-4 flex items-center gap-2">
+                        <Flame size={20} className="text-orange-500"/> ✨ AI Inflammation Storyteller
+                    </h3>
+                    <div className="flex gap-2 mb-4">
+                        <input 
+                            value={injury} 
+                            onChange={(e) => setInjury(e.target.value)} 
+                            placeholder="Enter injury (e.g. Bee Sting)..." 
+                            className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-indigo-500 shadow-sm"
+                        />
+                        <ModernBtn label="Simulate" onClick={simulate} variant="primary" disabled={loading} />
+                    </div>
+                    {response && (
+                        <div className="bg-white p-4 rounded-xl border border-indigo-100 text-sm text-slate-700 leading-relaxed animate-slide-up shadow-sm">
+                            <strong className="text-indigo-700 block mb-2">Biological Response Log:</strong>
+                            {response}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const PhagocytosisLab = () => {
+            const [step, setStep] = useState(0);
+            const [showDetails, setShowDetails] = useState(false);
+
+            return (
+                <div className="pro-card p-6 animate-slide-up">
+                    <div className="flex justify-between items-start mb-6">
+                        <div><h3 className="font-bold text-lg text-slate-800">Phagocytosis Simulation</h3><p className="text-sm text-slate-500">Neutrophils & Monocytes in action</p></div>
+                        <Badge color="indigo">Second Line</Badge>
+                    </div>
+                    <div className="relative h-64 bg-slate-900 rounded-xl overflow-hidden mb-6 flex items-center justify-center border border-slate-800">
+                        <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+                        <div className={`w-32 h-32 bg-indigo-500/80 backdrop-blur-md flex items-center justify-center transition-all duration-700 absolute ${step === 0 ? 'rounded-full scale-100' : ''} ${step === 1 ? 'rounded-[40%_60%_70%_30%/40%_50%_60%_50%] scale-110 translate-x-4' : ''} ${step === 2 ? 'rounded-full scale-105' : ''}`}>
+                            <div className="text-white text-xs font-bold opacity-50">NUCLEUS</div>
+                            {step >= 2 && <div className="absolute w-6 h-6 bg-yellow-400 rounded-full top-4 right-4 shadow-lg shadow-yellow-400/50 animate-pulse"></div>}
+                        </div>
+                        <div className={`absolute transition-all duration-700 ${step === 0 ? 'right-20 text-4xl animate-bounce' : ''} ${step === 1 ? 'right-1/2 translate-x-4 text-2xl opacity-80' : ''} ${step === 2 ? 'right-1/2 text-xl opacity-0 scale-0' : ''}`}>🦠</div>
+                        <div className="absolute bottom-4 left-4 text-xs font-mono text-indigo-300">STATUS: {step === 0 ? "DETECTING..." : step === 1 ? "ENGULFING (PHAGOSOME)..." : "DIGESTING..."}</div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between items-center bg-slate-50 p-4 rounded-lg border border-slate-100 gap-4">
+                        <div className="text-sm font-medium text-slate-700">{step === 0 && "1. Phagocyte detects pathogen."}{step === 1 && "2. Pseudopodia extend to engulf germ."}{step === 2 && "3. Lysosomes fuse & digest germ."}</div>
+                        <ModernBtn label={step < 2 ? "Next Step" : "Reset"} onClick={() => setStep(s => s < 2 ? s + 1 : 0)} variant="primary" icon={ChevronRight} className="w-full sm:w-auto" />
+                    </div>
+                    
+                    <InflammationSimulator />
+
+                    <DetailBox title="Mechanism: Internal Nonspecific Defense" isOpen={showDetails} toggle={() => setShowDetails(!showDetails)}>
+                        <div className="space-y-4 text-slate-700">
+                            <div>
+                                <strong className="text-indigo-700">1. Phagocytosis Steps:</strong>
+                                <ol className="list-decimal pl-5 mt-1 space-y-1">
+                                    <li>Phagocyte approaches the germ.</li>
+                                    <li>Engulfs pathogen in a membrane sac called the <strong>Phagosome</strong>.</li>
+                                    <li><strong>Lysosome</strong> fuses with the phagosome.</li>
+                                    <li>Enzymes digest and destroy the pathogen.</li>
+                                    <li>Waste is expelled.</li>
+                                </ol>
+                            </div>
+                            <div>
+                                <strong className="text-indigo-700">2. Inflammatory Response:</strong>
+                                <p>When tissues are damaged, chemicals like <strong>Histamine</strong> are released. This causes <strong>vasodilation</strong> (widening of blood vessels), leading to increased blood flow. This results in redness, heat, and swelling, but allows more White Blood Cells to reach the site quickly.</p>
+                            </div>
+                        </div>
+                    </DetailBox>
+                </div>
+            );
+        };
+
+        const FeverChart = () => {
+            const [temp, setTemp] = useState(37);
+            const [showDetails, setShowDetails] = useState(false);
+            const infectionLoad = temp < 38 ? 100 : Math.max(0, 100 - (temp - 37) * 40);
+            
+            return (
+                <div className="pro-card p-6 mt-6 animate-slide-up">
+                    <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><Thermometer size={20} className="text-rose-500"/> Fever Response</h3>
+                    <div className="flex flex-col sm:flex-row gap-8 items-center">
+                        <div className="flex-1 w-full">
+                            <div className="flex justify-between text-xs font-bold text-slate-500 mb-2"><span>BODY TEMP</span><span className={temp > 37.5 ? "text-rose-600" : "text-emerald-600"}>{temp}°C</span></div>
+                            <input type="range" min="37" max="41" step="0.1" value={temp} onChange={(e) => setTemp(parseFloat(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-500" />
+                        </div>
+                        <div className="flex-1 w-full bg-slate-900 rounded-lg p-4">
+                            <div className="text-xs font-mono text-slate-400 mb-2">GERM REPLICATION RATE</div>
+                            <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden"><div className={`h-full transition-all duration-500 ${infectionLoad > 50 ? "bg-rose-500" : "bg-emerald-500"}`} style={{width: `${infectionLoad}%`}}></div></div>
+                        </div>
+                    </div>
+                    
+                    <DetailBox title="Physiology: Fever" isOpen={showDetails} toggle={() => setShowDetails(!showDetails)}>
+                        <p className="text-slate-700">
+                            Fever is not a disease but a defense mechanism. White Blood Cells produce chemicals called <strong>Pyrogens</strong> that raise the body's temperature. High temperature inhibits the multiplication of germs and increases the production of <strong>Interferon</strong> (a protein that blocks viral replication).
+                        </p>
+                    </DetailBox>
+                </div>
+            )
+        }
+
+        // --- ZONE 3: SPECIFIC DEFENSE ---
+        const SpecificDefense = () => {
+            const [chatOpen, setChatOpen] = useState(null);
+            const [chatHistory, setChatHistory] = useState([]);
+            const [input, setInput] = useState("");
+            const [loading, setLoading] = useState(false);
+            const [showDetails, setShowDetails] = useState(false);
+
+            const cells = [
+                { id: 'b', name: 'B-Cell', desc: 'Antibody Factory', color: 'indigo' },
+                { id: 't', name: 'T-Cell', desc: 'Cellular Assassin', color: 'rose' },
+                { id: 'n', name: 'Neutrophil', desc: 'First Responder', color: 'teal' }
+            ];
+
+            const sendMsg = async () => {
+                if(!input.trim()) return;
+                const userMsg = input;
+                setInput("");
+                setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
+                setLoading(true);
+                const prompt = `Roleplay as a ${chatOpen.name} (${chatOpen.desc}) in the immune system. Be professional but educational for a 10th grader. Keep it short. User asked: "${userMsg}"`;
+                const reply = await callGemini(prompt);
+                setChatHistory(prev => [...prev, { role: 'ai', text: reply }]);
+                setLoading(false);
+            };
+
+            return (
+                <div className="space-y-6 animate-slide-up">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {cells.map(c => (
+                            <button key={c.id} onClick={() => { setChatOpen(c); setChatHistory([]); }} className={`p-4 rounded-xl border transition-all text-left group ${chatOpen?.id === c.id ? `bg-${c.color}-50 border-${c.color}-500 ring-1 ring-${c.color}-500` : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'}`}>
+                                <div className={`w-8 h-8 rounded-full bg-${c.color}-100 flex items-center justify-center text-${c.color}-700 font-bold text-xs mb-3`}>{c.name[0]}</div>
+                                <div className="font-bold text-slate-800 text-sm">{c.name}</div>
+                                <div className="text-xs text-slate-500">{c.desc}</div>
+                            </button>
+                        ))}
+                    </div>
+                    {chatOpen && (
+                        <div className="pro-card flex flex-col h-[400px]">
+                            <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div><span className="font-bold text-sm text-slate-700">Chatting with {chatOpen.name}</span></div>
+                                <button onClick={() => setChatOpen(null)} className="text-slate-400 hover:text-slate-600"><X size={16}/></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll bg-slate-50">
+                                {chatHistory.map((msg, i) => <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-slate-800 text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'}`}>{msg.text}</div></div>)}
+                                {loading && <div className="flex justify-start"><div className="bg-slate-200 rounded-full px-3 py-1 text-xs animate-pulse">Typing...</div></div>}
+                            </div>
+                            <div className="p-4 border-t border-slate-100 bg-white"><div className="flex gap-2"><input value={input} onChange={e => setInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && sendMsg()} placeholder="Type your question..." className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" /><ModernBtn label="Send" onClick={sendMsg} variant="primary" /></div></div>
+                        </div>
+                    )}
+                    
+                    <div className="pro-card p-4">
+                        <DetailBox title="Study Notes: Specific Defense & Lymphocytes" isOpen={showDetails} toggle={() => setShowDetails(!showDetails)}>
+                            <ul className="list-disc pl-5 space-y-2 text-slate-700">
+                                <li><strong>B-Lymphocytes (B-Cells):</strong> Mature in the <strong>Bone Marrow</strong>. They produce antibodies that attack bacteria and viruses present in body fluids (blood/lymph).</li>
+                                <li><strong>T-Lymphocytes (T-Cells):</strong> Mature in the <strong>Thymus gland</strong>. They attack the body's own cells that have been infected (by viruses or cancer). They also stimulate B-cells to produce antibodies.</li>
+                                <li><strong>Antigens:</strong> Any foreign substance (like a germ surface protein) that triggers an immune response.</li>
+                                <li><strong>Antibodies:</strong> Y-shaped proteins produced by B-cells that lock onto specific antigens to destroy them (Disintegrate, Neutralize, or Clump).</li>
+                            </ul>
+                        </DetailBox>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- ZONE 4: BLOOD & VACCINES ---
+        const BloodLab = () => {
+            const [donor, setDonor] = useState('A');
+            const [recipient, setRecipient] = useState('B');
+            const [result, setResult] = useState(null);
+            const [report, setReport] = useState(null);
+            const [generating, setGenerating] = useState(false);
+            const [showDetails, setShowDetails] = useState(false);
+
+            const check = () => {
+                let safe = false;
+                if (donor === 'O' || recipient === 'AB' || donor === recipient) safe = true;
+                setResult(safe ? 'safe' : 'clot');
+                setReport(null);
+            };
+
+            const generateReport = async () => {
+                setGenerating(true);
+                const status = result === 'safe' ? "Successful Compatibility" : "Acute Hemolytic Reaction (Clotting)";
+                const prompt = `Act as a hematologist. Write a very brief, formal medical report (max 2 sentences) for a blood transfusion from Donor ${donor} to Recipient ${recipient}. Result: ${status}. Mention antigens/antibodies.`;
+                const res = await callGemini(prompt);
+                setReport(res);
+                setGenerating(false);
+            };
+
+            return (
+                <div className="pro-card p-6 animate-slide-up">
+                    <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2"><Heart size={20} className="text-rose-500"/> Transfusion Compatibility</h3>
+                    <div className="flex items-center justify-center gap-4 mb-8">
+                        <div className="text-center">
+                            <div className="w-20 h-24 bg-slate-50 border border-slate-200 rounded-lg flex flex-col items-center justify-center mb-2 shadow-sm"><div className="text-rose-600 font-black text-2xl">{donor}</div><div className="text-[10px] text-slate-400 uppercase font-bold mt-1">Donor</div></div>
+                            <select value={donor} onChange={e => {setDonor(e.target.value); setResult(null)}} className="text-xs p-1 bg-white border rounded">{['A','B','AB','O'].map(t => <option key={t} value={t}>Type {t}</option>)}</select>
+                        </div>
+                        <div className="relative w-24 h-24 rounded-full border-4 border-slate-100 flex items-center justify-center bg-white shadow-inner overflow-hidden">
+                            {result === null && <span className="text-slate-300 text-xs">Mix</span>}
+                            {result === 'safe' && <div className="w-full h-full bg-rose-500 opacity-80 blur-sm transition-all duration-1000"></div>}
+                            {result === 'clot' && <div className="w-16 h-16 bg-rose-900 rounded-full flex items-center justify-center animate-bounce"><X className="text-white"/></div>}
+                        </div>
+                        <div className="text-center">
+                            <div className="w-20 h-24 bg-slate-50 border border-slate-200 rounded-lg flex flex-col items-center justify-center mb-2 shadow-sm"><div className="text-rose-600 font-black text-2xl">{recipient}</div><div className="text-[10px] text-slate-400 uppercase font-bold mt-1">Patient</div></div>
+                            <select value={recipient} onChange={e => {setRecipient(e.target.value); setResult(null)}} className="text-xs p-1 bg-white border rounded">{['A','B','AB','O'].map(t => <option key={t} value={t}>Type {t}</option>)}</select>
+                        </div>
+                    </div>
+                    <ModernBtn label="Perform Transfusion" onClick={check} variant="danger" className="w-full" />
+                    {result && (
+                        <div className="mt-4 space-y-3">
+                            <div className={`p-3 rounded-lg text-center text-sm font-bold border ${result === 'safe' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+                                {result === 'safe' ? "✅ Transfusion Successful" : "❌ AGGLUTINATION DETECTED"}
+                            </div>
+                            {!report && <ModernBtn label={generating ? "Generating Report..." : "📄 Generate Medical Report (AI)"} onClick={generateReport} variant="secondary" className="w-full" icon={FileText} />}
+                            {report && <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 leading-relaxed animate-slide-up"><strong>MEDICAL REPORT:</strong><br/>{report}</div>}
+                        </div>
+                    )}
+                    
+                    <DetailBox title="Study Notes: Blood Groups & Rh Factor" isOpen={showDetails} toggle={() => setShowDetails(!showDetails)}>
+                        <div className="space-y-4 text-slate-700">
+                            <div>
+                                <strong className="text-rose-700">ABO System (Karl Landsteiner):</strong>
+                                <ul className="list-disc pl-5 mt-1 space-y-1">
+                                    <li><strong>Type A:</strong> Antigen A, Antibody b.</li>
+                                    <li><strong>Type B:</strong> Antigen B, Antibody a.</li>
+                                    <li><strong>Type AB:</strong> Antigens A & B, No antibodies. <em>(Universal Recipient)</em></li>
+                                    <li><strong>Type O:</strong> No antigens, Antibodies a & b. <em>(Universal Donor)</em></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong className="text-rose-700">Erythroblastosis Foetalis:</strong>
+                                <p>A condition usually occurring in the second pregnancy of an <strong>Rh-negative mother</strong> carrying an <strong>Rh-positive fetus</strong>. The mother's antibodies attack the fetal blood cells, causing severe anemia or death.</p>
+                            </div>
+                        </div>
+                    </DetailBox>
+                </div>
+            );
+        };
+
+        // --- ZONE 5: PLANTS ---
+        const PlantLab = () => {
+            const [threat, setThreat] = useState("");
+            const [simResult, setSimResult] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [showDetails, setShowDetails] = useState(false);
+
+            const runSim = async () => {
+                if (!threat) return;
+                setLoading(true);
+                const prompt = `Simulate a plant's biological defense against: "${threat}". Use scientific terms (Lignin, Cuticle, Toxins, Thorns) but explain simply. Keep it under 2 sentences.`;
+                const res = await callGemini(prompt);
+                setSimResult(res);
+                setLoading(false);
+            };
+
+            return (
+                <div className="pro-card p-6 animate-slide-up">
+                    <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><Leaf size={20} className="text-emerald-600"/> Plant Survival Simulator</h3>
+                    <div className="bg-emerald-50/50 rounded-xl p-6 border border-emerald-100 mb-4 text-center">
+                        <div className="text-4xl mb-4">🌱</div>
+                        <p className="text-sm text-slate-600 mb-4">I am a plant. What is attacking me?</p>
+                        <div className="flex gap-2">
+                            <input value={threat} onChange={e => setThreat(e.target.value)} placeholder="e.g. Caterpillar, Drought, Fungus" className="flex-1 px-4 py-3 rounded-xl border border-emerald-200 text-sm focus:outline-none focus:border-emerald-500 shadow-sm" />
+                            <ModernBtn label="Attack" onClick={runSim} variant="accent" disabled={loading} />
+                        </div>
+                    </div>
+                    {simResult && <div className="bg-white p-4 rounded-lg border border-slate-100 shadow-sm text-sm text-slate-700 leading-relaxed animate-slide-up"><strong className="text-emerald-700 block mb-1">Defense Activated:</strong>{simResult}</div>}
+                    
+                    <DetailBox title="Study Notes: Defense in Plants" isOpen={showDetails} toggle={() => setShowDetails(!showDetails)}>
+                        <div className="space-y-4 text-slate-700">
+                            <div>
+                                <strong className="text-emerald-700">1. Structural (Morphological) Defense:</strong>
+                                <ul className="list-disc pl-5 mt-1 space-y-1">
+                                    <li><strong>Cuticle:</strong> Wax coating preventing water loss and germ entry.</li>
+                                    <li><strong>Bark:</strong> Hard, dead outer layer protecting the stem.</li>
+                                    <li><strong>Thorns/Spines:</strong> Prevent animals from eating the plant (e.g., Cactus, Rose).</li>
+                                    <li><strong>Thick Cell Walls:</strong> Physical barrier against pathogens.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong className="text-emerald-700">2. Chemical (Physiological) Defense:</strong>
+                                <ul className="list-disc pl-5 mt-1 space-y-1">
+                                    <li><strong>Callose:</strong> A polysaccharide that blocks pores (plasmodesmata) to stop germs from spreading between cells.</li>
+                                    <li><strong>Lignin / Cutin / Suberin:</strong> Substances that strengthen and harden cell walls.</li>
+                                    <li><strong>Antimicrobials:</strong> Chemical poisons produced to kill bacteria or fungi.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </DetailBox>
+                </div>
+            );
+        };
+
+        // --- NEW: AI EXAM PREP ---
+        const AIExamPrep = () => {
+            const [mode, setMode] = useState('quiz'); // quiz or mnemonic
+            const [topic, setTopic] = useState("General Immunity");
+            const [qData, setQData] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [selected, setSelected] = useState(null);
+            const [mnemonicTopic, setMnemonicTopic] = useState("");
+            const [mnemonicRes, setMnemonicRes] = useState(null);
+
+            const generateQ = async () => {
+                setLoading(true);
+                setQData(null);
+                setSelected(null);
+                const schema = {
+                    type: "OBJECT",
+                    properties: {
+                        question: { type: "STRING" },
+                        options: { type: "ARRAY", items: { type: "STRING" } },
+                        correctIndex: { type: "INTEGER" },
+                        explanation: { type: "STRING" }
+                    }
+                };
+                const prompt = `Create a challenging 10th-grade biology multiple choice question about '${topic}'. Include 4 options and the correct index.`;
+                const res = await callGeminiJSON(prompt, schema);
+                setQData(res);
+                setLoading(false);
+            };
+
+            const generateMnemonic = async () => {
+                if (!mnemonicTopic) return;
+                setLoading(true);
+                const prompt = `Create a catchy, funny mnemonic (memory aid) for a 10th grader to remember: "${mnemonicTopic}". Explain what each letter stands for.`;
+                const res = await callGemini(prompt);
+                setMnemonicRes(res);
+                setLoading(false);
+            };
+
+            return (
+                <div className="pro-card p-6 animate-slide-up bg-gradient-to-br from-white to-slate-50">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><Brain size={20} className="text-indigo-600"/> AI Exam Prep</h3>
+                        <div className="flex bg-slate-100 p-1 rounded-lg">
+                            <button onClick={() => setMode('quiz')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${mode === 'quiz' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Quiz</button>
+                            <button onClick={() => setMode('mnemonic')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${mode === 'mnemonic' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Mnemonics</button>
+                        </div>
+                    </div>
+
+                    {mode === 'quiz' && (
+                        <>
+                            {!qData && !loading && (
+                                <div className="text-center py-8">
+                                    <p className="text-sm text-slate-500 mb-4">Select a topic to generate a unique question.</p>
+                                    <div className="flex gap-2 justify-center mb-6">
+                                        {['Skin', 'WBCs', 'Blood Groups', 'Plants'].map(t => (
+                                            <button key={t} onClick={() => setTopic(t)} className={`px-3 py-1 rounded-full text-xs font-medium border ${topic === t ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'}`}>{t}</button>
+                                        ))}
+                                    </div>
+                                    <ModernBtn label="Generate Question" onClick={generateQ} variant="primary" className="w-full max-w-xs mx-auto" icon={Sparkles} />
+                                </div>
+                            )}
+
+                            {loading && <div className="py-12 text-center text-sm text-indigo-600 font-medium animate-pulse">Consulting AI Biologist...</div>}
+
+                            {qData && (
+                                <div className="animate-slide-up">
+                                    <div className="text-base font-bold text-slate-800 mb-4">{qData.question}</div>
+                                    <div className="space-y-2 mb-4">
+                                        {qData.options.map((opt, i) => (
+                                            <button 
+                                                key={i} 
+                                                onClick={() => setSelected(i)}
+                                                disabled={selected !== null}
+                                                className={`w-full text-left p-3 rounded-lg border text-sm transition-all-300
+                                                    ${selected === null 
+                                                        ? 'bg-white border-slate-200 hover:border-indigo-400' 
+                                                        : i === qData.correctIndex 
+                                                            ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-bold' 
+                                                            : i === selected 
+                                                                ? 'bg-rose-50 border-rose-500 text-rose-800' 
+                                                                : 'bg-slate-50 border-slate-200 opacity-50'}
+                                                `}
+                                            >
+                                                {opt}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {selected !== null && (
+                                        <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-sm text-indigo-900 animate-slide-up">
+                                            <strong>Explanation:</strong> {qData.explanation}
+                                            <div className="mt-3 text-right">
+                                                <button onClick={generateQ} className="text-xs font-bold text-indigo-700 hover:underline">Next Question &rarr;</button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {mode === 'mnemonic' && (
+                        <div className="animate-slide-up">
+                            <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-4">
+                                <h4 className="font-bold text-indigo-800 text-sm mb-2 flex items-center gap-2"><Wand size={16}/> Magic Memory Aid</h4>
+                                <p className="text-xs text-indigo-600 mb-3">Type terms you can't remember (e.g. "Prophase Metaphase Anaphase").</p>
+                                <div className="flex gap-2">
+                                    <input 
+                                        value={mnemonicTopic} 
+                                        onChange={e => setMnemonicTopic(e.target.value)} 
+                                        placeholder="Enter difficult terms..." 
+                                        className="flex-1 bg-white border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                                    />
+                                    <ModernBtn label="Create" onClick={generateMnemonic} variant="indigo" disabled={loading} />
+                                </div>
+                            </div>
+                            {mnemonicRes && (
+                                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-sm text-slate-700 leading-relaxed animate-slide-up">
+                                    {mnemonicRes}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- APP SHELL ---
+        const App = () => {
+            const [view, setView] = useState('landing');
+            const [activeTab, setActiveTab] = useState('external');
+            const [menuOpen, setMenuOpen] = useState(false);
+
+            const menuItems = [
+                { id: 'external', label: 'External Defense', icon: Shield },
+                { id: 'internal', label: 'Internal Defense', icon: Activity },
+                { id: 'specific', label: 'Specific Defense', icon: Microscope },
+                { id: 'blood', label: 'Blood & Vaccines', icon: Heart },
+                { id: 'plants', label: 'Plant Defense', icon: Leaf },
+                { id: 'exam', label: 'AI Exam Prep', icon: Brain },
+            ];
+
+            if (view === 'landing') {
+                return <LandingPage onEnter={() => setView('app')} />;
+            }
+
+            return (
+                <div className="min-h-screen flex bg-slate-50">
+                    <div className={`fixed inset-0 bg-black/20 z-40 lg:hidden ${menuOpen ? 'block' : 'hidden'}`} onClick={() => setMenuOpen(false)}></div>
+                    <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 lg:translate-x-0 ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <div className="p-6 border-b border-slate-100">
+                            <div className="flex items-center gap-2 text-indigo-600 font-bold text-xl">
+                                <div className="p-1.5 bg-indigo-600 text-white rounded-lg"><Shield size={20}/></div>
+                                BioLab
+                            </div>
+                            <div className="text-xs text-slate-400 mt-1 font-medium">SSLC IMMUNITY MASTER</div>
+                        </div>
+                        <nav className="p-4 space-y-1">
+                            {menuItems.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => { setActiveTab(item.id); setMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${activeTab === item.id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                                >
+                                    <item.icon size={18} />
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="absolute bottom-0 w-full p-4 border-t border-slate-100">
+                            <div className="bg-slate-900 text-white rounded-lg p-4 text-xs">
+                                <div className="font-bold mb-1">Exam Prep Mode</div>
+                                <div className="text-slate-400">Progress: 65%</div>
+                                <div className="w-full bg-slate-700 h-1 rounded-full mt-2 overflow-hidden"><div className="bg-emerald-400 h-full w-[65%]"></div></div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <main className="flex-1 lg:ml-64 min-h-screen flex flex-col">
+                        <header className="lg:hidden bg-white border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+                            <div className="font-bold text-slate-800">BioLab</div>
+                            <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 text-slate-600">{menuOpen ? <X size={24}/> : <Menu size={24}/>}</button>
+                        </header>
+
+                        <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
+                            <div className="mb-8">
+                                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{menuItems.find(i => i.id === activeTab)?.label}</h1>
+                                <p className="text-slate-500 text-sm">Interactive laboratory simulation module.</p>
+                            </div>
+
+                            {activeTab === 'external' && <ZoneExternal />}
+                            {activeTab === 'internal' && <div className="space-y-6"><PhagocytosisLab /><FeverChart /></div>}
+                            {activeTab === 'specific' && <SpecificDefense />}
+                            {activeTab === 'blood' && <BloodLab />}
+                            {activeTab === 'plants' && <PlantLab />}
+                            {activeTab === 'exam' && <AIExamPrep />}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
