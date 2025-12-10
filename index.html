@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
@@ -100,6 +99,13 @@
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
+        
+        /* Markdown-like simple styling */
+        .ai-text strong { color: #4338ca; font-weight: 700; }
+        .perspective-1000 { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
     </style>
 </head>
 <body>
@@ -110,7 +116,7 @@
         const apiKey = "AIzaSyAHY9Fk6IgqbYLGshgAmaaZRf4QGTPk9SU"; 
 
         // --- ICON DEFINITIONS ---
-        // Using Lucide Icons for a consistent premium look
+        // Using inline SVGs for stability without external dependencies
         const IconBase = ({ children, size = 24, className = "" }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {children}
@@ -124,7 +130,7 @@
         const Microscope = (props) => <IconBase {...props}><path d="M6 18h8" /><path d="M3 22h18" /><path d="M14 22a7 7 0 1 0 0-14h-1" /><path d="M9 14h2" /><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" /><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" /></IconBase>;
         const BookOpen = (props) => <IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></IconBase>;
         const Activity = (props) => <IconBase {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></IconBase>;
-        const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" /></IconBase>;
+        const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></IconBase>;
         const Leaf = (props) => <IconBase {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></IconBase>;
         const Menu = (props) => <IconBase {...props}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></IconBase>;
         const X = (props) => <IconBase {...props}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></IconBase>;
@@ -136,6 +142,15 @@
         const Brain = (props) => <IconBase {...props}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" /><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" /></IconBase>;
         const Flame = (props) => <IconBase {...props}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.2-2.2.6-3.3a1 1 0 0 1 1.4-.2z"/></IconBase>;
         const Wand = (props) => <IconBase {...props}><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></IconBase>;
+        const Swords = (props) => <IconBase {...props}><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" /><line x1="13" x2="19" y1="19" y2="13" /><line x1="16" x2="20" y1="16" y2="20" /><line x1="19" x2="21" y1="21" y2="19" /><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" /><line x1="5" x2="9" y1="14" y2="18" /><line x1="7" x2="4" y1="17" y2="20" /><line x1="3" x2="5" y1="19" y2="21" /></IconBase>;
+        const Lightbulb = (props) => <IconBase {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></IconBase>;
+        const ArrowLeft = (props) => <IconBase {...props}><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></IconBase>;
+        const Send = (props) => <IconBase {...props}><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></IconBase>;
+        const Check = (props) => <IconBase {...props}><path d="M20 6 9 17l-5-5" /></IconBase>;
+        // Added missing icons
+        const Layers = (props) => <IconBase {...props}><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /></IconBase>;
+        const MessageSquare = (props) => <IconBase {...props}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></IconBase>;
+        const Calendar = (props) => <IconBase {...props}><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></IconBase>;
 
         // --- GEMINI API HELPERS ---
         const callGemini = async (prompt, systemInstruction = "") => {
@@ -175,6 +190,7 @@
                 accent: "bg-teal-600 text-white active:bg-teal-700 shadow-lg shadow-teal-600/20 hover:-translate-y-0.5",
                 danger: "bg-rose-600 text-white active:bg-rose-700 shadow-lg shadow-rose-600/20 hover:-translate-y-0.5",
                 indigo: "bg-indigo-600 text-white active:bg-indigo-700 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5",
+                amber: "bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20",
                 ghost: "bg-transparent text-slate-500 active:text-slate-900 hover:bg-slate-100"
             };
             return (
@@ -215,55 +231,29 @@
             </div>
         );
 
-        // --- UPDATED MODERN LANDING PAGE ---
+        // --- LANDING PAGE ---
         const LandingPage = ({ onEnter }) => {
             return (
                 <div className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center font-['Inter']">
-                    {/* Animated Premium Background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50 animate-gradient-xy"></div>
-                    
-                    {/* Floating Orbs */}
                     <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
                     <div className="absolute top-0 -right-4 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
                     <div className="absolute -bottom-8 left-20 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
 
-                    {/* Content Container */}
                     <div className="relative z-10 w-full max-w-lg px-6 flex flex-col items-center justify-center text-center pb-20 pt-10 min-h-screen">
-                        
-                        {/* Main Title - Serif Font */}
                         <div className="mb-12 animate-slide-up opacity-0" style={{animationDelay: '0.1s'}}>
-                            <h1 className="text-6xl md:text-7xl font-['Playfair_Display'] text-slate-900 tracking-tight leading-none mb-2">
-                                WELCOME
-                            </h1>
-                            <h1 className="text-6xl md:text-7xl font-['Playfair_Display'] italic text-indigo-900 tracking-tight leading-none">
-                                ANSA
-                            </h1>
+                            <h1 className="text-6xl md:text-7xl font-['Playfair_Display'] text-slate-900 tracking-tight leading-none mb-2">WELCOME</h1>
+                            <h1 className="text-6xl md:text-7xl font-['Playfair_Display'] italic text-indigo-900 tracking-tight leading-none">ANSA</h1>
                         </div>
-
-                        {/* Glassmorphism Quote Card */}
                         <div className="w-full glass-panel rounded-2xl p-8 mb-16 shadow-xl animate-slide-up opacity-0" style={{animationDelay: '0.3s'}}>
-                            <div className="flex justify-center mb-4 text-indigo-400">
-                                <Sparkles size={24} />
-                            </div>
-                            <p className="text-lg md:text-xl text-slate-700 leading-relaxed font-light mb-6">
-                                "I just want you to study well and write your exams confidently, Ansa... I know you can do it."
-                            </p>
-                            <div className="flex justify-center gap-3 text-2xl">
-                                <span>💛</span>
-                                <span>✨</span>
-                            </div>
+                            <div className="flex justify-center mb-4 text-indigo-400"><Sparkles size={24} /></div>
+                            <p className="text-lg md:text-xl text-slate-700 leading-relaxed font-light mb-6">"I just want you to study well and write your exams confidently, Ansa... I know you can do it."</p>
+                            <div className="flex justify-center gap-3 text-2xl"><span>💛</span><span>✨</span></div>
                         </div>
-
-                        {/* Action Button */}
                         <div className="animate-slide-up opacity-0 w-full" style={{animationDelay: '0.5s'}}>
-                            <button 
-                                onClick={onEnter}
-                                className="group relative w-full bg-slate-900 text-white rounded-2xl py-5 px-8 text-lg font-bold shadow-2xl shadow-slate-900/30 hover:shadow-slate-900/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden flex items-center justify-center gap-3"
-                            >
+                            <button onClick={onEnter} className="group relative w-full bg-slate-900 text-white rounded-2xl py-5 px-8 text-lg font-bold shadow-2xl shadow-slate-900/30 hover:shadow-slate-900/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden flex items-center justify-center gap-3">
                                 <span className="relative z-10">Get Started</span>
                                 <ChevronRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-                                
-                                {/* Shine Effect */}
                                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"></div>
                             </button>
                             <p className="mt-4 text-xs text-slate-400 font-medium tracking-wide uppercase">SSLC Biology Master Lab</p>
@@ -335,11 +325,17 @@
             const [injury, setInjury] = useState("");
             const [response, setResponse] = useState(null);
             const [loading, setLoading] = useState(false);
+            const [isNewsMode, setIsNewsMode] = useState(false);
 
             const simulate = async () => {
                 if (!injury) return;
                 setLoading(true);
-                const prompt = `Describe the body's inflammatory response to: "${injury}". Explain the role of Histamine, vasodilation, and phagocytes simply for a 10th grader. Keep it short.`;
+                let prompt = "";
+                if (isNewsMode) {
+                    prompt = `Write a dramatic, "Breaking News" TV script reporting on an injury: "${injury}". You are an anchor named "Immuno-Ron". Describe the scene (swelling, heat) and the arrival of "First Responder Phagocytes" and "Chemical Squads (Histamine)". Keep it funny and educational for students. Max 100 words.`;
+                } else {
+                    prompt = `Describe the body's inflammatory response to: "${injury}". Explain the role of Histamine, vasodilation, and phagocytes simply for a 10th grader. Keep it short.`;
+                }
                 const res = await callGemini(prompt);
                 setResponse(res);
                 setLoading(false);
@@ -350,19 +346,27 @@
                     <h3 className="font-bold text-lg text-indigo-900 mb-4 flex items-center gap-2">
                         <Flame size={20} className="text-orange-500"/> ✨ AI Inflammation Storyteller
                     </h3>
-                    <div className="flex gap-2 mb-4">
-                        <input 
-                            value={injury} 
-                            onChange={(e) => setInjury(e.target.value)} 
-                            placeholder="Enter injury (e.g. Bee Sting)..." 
-                            className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-indigo-500 shadow-sm"
-                        />
-                        <ModernBtn label="Simulate" onClick={simulate} variant="primary" disabled={loading} />
+                    <div className="flex flex-col gap-3 mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                             <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+                                <input type="checkbox" checked={isNewsMode} onChange={e => setIsNewsMode(e.target.checked)} className="rounded text-indigo-600 focus:ring-indigo-500" />
+                                📺 News Anchor Mode
+                            </label>
+                        </div>
+                        <div className="flex gap-2">
+                            <input 
+                                value={injury} 
+                                onChange={(e) => setInjury(e.target.value)} 
+                                placeholder="Enter injury (e.g. Bee Sting, Cut)..." 
+                                className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-indigo-500 shadow-sm"
+                            />
+                            <ModernBtn label={isNewsMode ? "Broadcast ✨" : "Simulate ✨"} onClick={simulate} variant="primary" disabled={loading} />
+                        </div>
                     </div>
                     {response && (
                         <div className="bg-white p-4 rounded-xl border border-indigo-100 text-sm text-slate-700 leading-relaxed animate-slide-up shadow-sm">
-                            <strong className="text-indigo-700 block mb-2">Biological Response Log:</strong>
-                            {response}
+                            <strong className="text-indigo-700 block mb-2">{isNewsMode ? "📺 LIVE BROADCAST:" : "Biological Response Log:"}</strong>
+                            <div className="ai-text" dangerouslySetInnerHTML={{__html: response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>')}}></div>
                         </div>
                     )}
                 </div>
@@ -445,6 +449,46 @@
             )
         }
 
+        // --- NEW COMPONENT: ANALOGY GENERATOR ---
+        const AnalogyGenerator = () => {
+            const [concept, setConcept] = useState("");
+            const [analogy, setAnalogy] = useState("");
+            const [loading, setLoading] = useState(false);
+
+            const generateAnalogy = async () => {
+                if (!concept) return;
+                setLoading(true);
+                const prompt = `Explain the biological concept "${concept}" using a simple, creative real-world analogy (like football, a castle siege, or a kitchen). Keep it short and fun for a student.`;
+                const res = await callGemini(prompt);
+                setAnalogy(res);
+                setLoading(false);
+            }
+
+            return (
+                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 mt-6">
+                    <h3 className="font-bold text-lg text-indigo-900 mb-2 flex items-center gap-2">
+                        <Lightbulb size={20} className="text-yellow-500"/> ✨ Smart Analogy Generator
+                    </h3>
+                    <p className="text-xs text-indigo-600 mb-4">Confused? Ask AI to explain a concept using a simple comparison.</p>
+                    <div className="flex gap-2 mb-4">
+                         <input 
+                            value={concept} 
+                            onChange={(e) => setConcept(e.target.value)} 
+                            placeholder="e.g. Antibody, Vaccine, T-Cell..." 
+                            className="flex-1 px-4 py-3 rounded-xl border border-indigo-200 text-sm focus:outline-none focus:border-indigo-500 bg-white"
+                        />
+                        <ModernBtn label="Explain ✨" onClick={generateAnalogy} variant="indigo" disabled={loading} />
+                    </div>
+                    {analogy && (
+                        <div className="bg-white p-4 rounded-xl border border-indigo-200 text-sm text-slate-700 shadow-sm leading-relaxed animate-slide-up">
+                            <strong className="text-indigo-600 block mb-1">Analogy:</strong>
+                            {analogy}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         // --- ZONE 3: SPECIFIC DEFENSE ---
         const SpecificDefense = () => {
             const [chatOpen, setChatOpen] = useState(null);
@@ -496,6 +540,8 @@
                         </div>
                     )}
                     
+                    <AnalogyGenerator />
+
                     <div className="pro-card p-4">
                         <DetailBox title="Study Notes: Specific Defense & Lymphocytes" isOpen={showDetails} toggle={() => setShowDetails(!showDetails)}>
                             <ul className="list-disc pl-5 space-y-2 text-slate-700">
@@ -639,13 +685,153 @@
             );
         };
 
+        // --- NEW FEATURE: BATTLE ARENA (GAME) ---
+        const BattleArena = () => {
+            const [gameState, setGameState] = useState('start'); // start, playing, won, lost
+            const [pathogen, setPathogen] = useState(null);
+            const [logs, setLogs] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [hp, setHp] = useState(100);
+
+            const startBattle = async () => {
+                setLoading(true);
+                setHp(100);
+                setLogs([]);
+                // Gemini generates a random pathogen
+                const schema = {
+                    type: "OBJECT",
+                    properties: {
+                        name: { type: "STRING" },
+                        type: { type: "STRING", enum: ["Virus", "Bacteria", "Fungus"] },
+                        description: { type: "STRING" },
+                        weakness: { type: "STRING" }
+                    }
+                };
+                const prompt = "Generate a random pathogen (Virus, Bacteria, or Fungus) for an immune system battle game. Give it a creative name.";
+                try {
+                    const data = await callGeminiJSON(prompt, schema);
+                    if (data) {
+                        setPathogen(data);
+                        setGameState('playing');
+                        setLogs([{ text: `⚠️ A wild ${data.name} (${data.type}) has appeared! ${data.description}`, type: 'warning' }]);
+                    }
+                } catch(e) { console.error(e); }
+                setLoading(false);
+            };
+
+            const playerMove = async (move) => {
+                if (!pathogen || loading) return;
+                setLoading(true);
+                
+                const prompt = `Turn-based battle. Pathogen: ${pathogen.name} (${pathogen.type}, Weakness: ${pathogen.weakness}). User used: "${move}". Calculate damage to pathogen (0-100) and damage to body (0-20). Describe the microscopic battle scene in 1 sentence. Return JSON.`;
+                const schema = {
+                    type: "OBJECT",
+                    properties: {
+                        damageToPathogen: { type: "INTEGER" },
+                        damageToBody: { type: "INTEGER" },
+                        narration: { type: "STRING" },
+                        isDefeated: { type: "BOOLEAN" }
+                    }
+                };
+
+                try {
+                    const res = await callGeminiJSON(prompt, schema);
+                    if (res) {
+                        setLogs(prev => [...prev, { text: `You used ${move}. ${res.narration}`, type: 'move' }]);
+                        setHp(h => Math.max(0, h - res.damageToBody));
+                        
+                        if (res.isDefeated || res.damageToPathogen > 50) { // Simplified win condition
+                             setLogs(prev => [...prev, { text: `🎉 Victory! The ${pathogen.name} has been eliminated.`, type: 'success' }]);
+                             setGameState('won');
+                        } else if (hp - res.damageToBody <= 0) {
+                             setLogs(prev => [...prev, { text: `💀 System Failure. The infection took over.`, type: 'danger' }]);
+                             setGameState('lost');
+                        } else {
+                             setLogs(prev => [...prev, { text: `The infection fights back! Body Integrity: ${hp - res.damageToBody}%`, type: 'info' }]);
+                        }
+                    }
+                } catch(e) { console.log(e); }
+                setLoading(false);
+            };
+
+            return (
+                <div className="pro-card p-6 animate-slide-up bg-slate-900 text-white border-slate-800">
+                    <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                        <h3 className="font-bold text-lg flex items-center gap-2 text-indigo-400">
+                            <Swords size={20}/> Immune Battle Arena
+                        </h3>
+                        <div className="text-xs font-mono bg-slate-800 px-2 py-1 rounded text-slate-400">GEMINI GAME MASTER</div>
+                    </div>
+
+                    {gameState === 'start' && (
+                        <div className="text-center py-12">
+                            <div className="text-6xl mb-4">🦠</div>
+                            <h2 className="text-xl font-bold mb-2">Defend the Body</h2>
+                            <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">Use your knowledge of immune cells to defeat randomly generated pathogens powered by AI.</p>
+                            <ModernBtn label="Start Simulation ✨" onClick={startBattle} variant="indigo" disabled={loading} className="w-full max-w-xs mx-auto" />
+                        </div>
+                    )}
+
+                    {gameState === 'playing' && pathogen && (
+                        <div className="space-y-4">
+                            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                                <div>
+                                    <div className="text-xs text-rose-400 font-bold uppercase tracking-wider mb-1">Target</div>
+                                    <div className="font-bold text-lg">{pathogen.name}</div>
+                                    <div className="text-xs text-slate-500">{pathogen.type}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider mb-1">System Integrity</div>
+                                    <div className="font-bold text-lg">{hp}%</div>
+                                    <div className="w-24 h-1 bg-slate-700 rounded-full mt-1 ml-auto overflow-hidden"><div className="bg-emerald-500 h-full transition-all duration-500" style={{width: `${hp}%`}}></div></div>
+                                </div>
+                            </div>
+
+                            <div className="h-48 overflow-y-auto custom-scroll bg-black/20 rounded-xl p-4 space-y-3">
+                                {logs.map((log, i) => (
+                                    <div key={i} className={`text-sm p-2 rounded border-l-2 ${log.type === 'move' ? 'border-indigo-500 bg-indigo-500/10' : log.type === 'warning' ? 'border-amber-500 bg-amber-500/10' : log.type === 'success' ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-600'}`}>
+                                            {log.text}
+                                    </div>
+                                ))}
+                                {loading && <div className="text-xs text-slate-500 animate-pulse">Calculating outcome...</div>}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <button onClick={() => playerMove("Macrophage Phagocytosis")} disabled={loading} className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 transition-colors text-left">🧬 Deploy Macrophage</button>
+                                <button onClick={() => playerMove("Helper T-Cell Signaling")} disabled={loading} className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 transition-colors text-left">📡 T-Cell Signal</button>
+                                <button onClick={() => playerMove("B-Cell Antibodies")} disabled={loading} className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 transition-colors text-left">🛡️ Fire Antibodies</button>
+                                <button onClick={() => playerMove("Killer T-Cell Strike")} disabled={loading} className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold border border-slate-700 transition-colors text-left">⚔️ Killer T-Cell</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {(gameState === 'won' || gameState === 'lost') && (
+                        <div className="text-center py-8">
+                            <div className="text-4xl mb-4">{gameState === 'won' ? '🎉' : '💀'}</div>
+                            <h2 className="text-xl font-bold mb-6">{gameState === 'won' ? 'Infection Cleared!' : 'System Failure'}</h2>
+                            <ModernBtn label="Play Again" onClick={startBattle} variant="primary" className="mx-auto" />
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         // --- NEW: AI EXAM PREP (OPTIMIZED) ---
         const AIExamPrep = () => {
-            const [mode, setMode] = useState('quiz'); // quiz or mnemonic
+            const [mode, setMode] = useState('menu'); // menu, quiz, flashcards, tutor, planner
             const [topic, setTopic] = useState("General Immunity");
             const [qData, setQData] = useState(null);
             const [loading, setLoading] = useState(false);
             const [selected, setSelected] = useState(null);
+            const [score, setScore] = useState({ correct: 0, total: 0 });
+            const [flashcards, setFlashcards] = useState([]);
+            const [flippedCard, setFlippedCard] = useState(null);
+            const [tutorChat, setTutorChat] = useState([]);
+            const [tutorInput, setTutorInput] = useState("");
+            const [daysLeft, setDaysLeft] = useState(7);
+            const [studyPlan, setStudyPlan] = useState("");
+            const chatEndRef = useRef(null);
+            const [quizDifficulty, setQuizDifficulty] = useState("Medium");
             const [mnemonicTopic, setMnemonicTopic] = useState("");
             const [mnemonicRes, setMnemonicRes] = useState(null);
 
@@ -657,6 +843,12 @@
                 "Blood Groups": { question: "Who is the Universal Donor?", options: ["Type A", "Type B", "Type AB", "Type O"], correctIndex: 3, explanation: "Type O has no antigens and can be given to anyone." },
                 "Plants": { question: "What blocks plasmodesmata to stop germ spread?", options: ["Lignin", "Callose", "Cutin", "Suberin"], correctIndex: 1, explanation: "Callose blocks the pores between cells." }
             };
+
+            useEffect(() => {
+                if (chatEndRef.current) {
+                    chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+                }
+            }, [tutorChat]);
 
             const generateQ = async () => {
                 setLoading(true);
@@ -695,6 +887,64 @@
                 setLoading(false);
             };
 
+            const handleAnswer = (index) => {
+                setSelected(index);
+                if (index === qData.correctIndex) setScore(s => ({ ...s, correct: s.correct + 1, total: s.total + 1 }));
+                else setScore(s => ({ ...s, total: s.total + 1 }));
+            };
+
+            const generateFlashcards = async () => {
+                setLoading(true);
+                setFlashcards([]);
+                const schema = {
+                    type: "ARRAY",
+                    items: {
+                        type: "OBJECT",
+                        properties: { front: { type: "STRING" }, back: { type: "STRING" } }
+                    }
+                };
+                const prompt = `Generate 6 study flashcards for '${topic}' (Immune System). Front: Term/Concept. Back: Simple definition. JSON Array.`;
+                try {
+                    const res = await callGeminiJSON(prompt, schema);
+                    if (res) setFlashcards(res);
+                } catch (e) { console.error(e); }
+                setLoading(false);
+            };
+
+            const startTutor = async () => {
+                setMode('tutor');
+                setLoading(true);
+                setTutorChat([]);
+                const intro = "I am Professor Cell. I will ask you oral questions about Immunity. Answer briefly to proceed. Are you ready?";
+                setTutorChat([{ role: 'ai', text: intro }]);
+                setLoading(false);
+            };
+
+            const sendTutorMsg = async () => {
+                if (!tutorInput.trim()) return;
+                const userMsg = tutorInput;
+                setTutorInput("");
+                setTutorChat(prev => [...prev, { role: 'user', text: userMsg }]);
+                setLoading(true);
+                
+                const prompt = `Context: Oral Exam on Immune System.
+History: ${JSON.stringify(tutorChat.slice(-3))}
+User said: "${userMsg}"
+Task: Grade the answer (correct/incorrect) and ask a NEW follow-up conceptual question. Be strict but encouraging. Keep it short.`;
+                
+                const res = await callGemini(prompt);
+                setTutorChat(prev => [...prev, { role: 'ai', text: res }]);
+                setLoading(false);
+            };
+
+            const generatePlan = async () => {
+                setLoading(true);
+                const prompt = `Create a text-based study plan for SSLC Biology (Immunity) for ${daysLeft} days. Break it down day-by-day. Be motivating.`;
+                const res = await callGemini(prompt);
+                setStudyPlan(res);
+                setLoading(false);
+            };
+
             const generateMnemonic = async () => {
                 if (!mnemonicTopic) return;
                 setLoading(true);
@@ -705,18 +955,49 @@
             };
 
             return (
-                <div className="pro-card p-6 animate-slide-up bg-gradient-to-br from-white to-slate-50">
+                <div className="pro-card p-6 animate-slide-up bg-gradient-to-br from-white to-slate-50 h-full flex flex-col">
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><Brain size={20} className="text-indigo-600"/> AI Exam Prep</h3>
-                        <div className="flex bg-slate-100 p-1 rounded-lg">
-                            <button onClick={() => setMode('quiz')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${mode === 'quiz' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Quiz</button>
-                            <button onClick={() => setMode('mnemonic')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${mode === 'mnemonic' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>Mnemonics</button>
-                        </div>
+                        <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><Brain size={20} className="text-indigo-600"/> AI Exam Suite</h3>
+                        {mode !== 'menu' && (
+                            <button onClick={() => setMode('menu')} className="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                                <ArrowLeft size={12}/> Back
+                            </button>
+                        )}
                     </div>
 
+                    {mode === 'menu' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button onClick={() => setMode('quiz')} className="group p-6 rounded-2xl border border-slate-200 hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-500/10 transition-all text-left bg-white">
+                                <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 mb-4"><Sparkles size={24}/></div>
+                                <div className="font-bold text-slate-800">Adaptive Quiz</div>
+                                <div className="text-xs text-slate-500 mt-1">Test your knowledge with AI questions.</div>
+                            </button>
+                            <button onClick={() => { setMode('flashcards'); generateFlashcards(); }} className="group p-6 rounded-2xl border border-slate-200 hover:border-teal-500 hover:shadow-lg hover:shadow-teal-500/10 transition-all text-left bg-white">
+                                <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center text-teal-600 mb-4"><Layers size={24}/></div>
+                                <div className="font-bold text-slate-800">Smart Flashcards</div>
+                                <div className="text-xs text-slate-500 mt-1">Generate study cards instantly.</div>
+                            </button>
+                            <button onClick={startTutor} className="group p-6 rounded-2xl border border-slate-200 hover:border-rose-500 hover:shadow-lg hover:shadow-rose-500/10 transition-all text-left bg-white">
+                                <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600 mb-4"><MessageSquare size={24}/></div>
+                                <div className="font-bold text-slate-800">Professor AI</div>
+                                <div className="text-xs text-slate-500 mt-1">Oral exam simulator.</div>
+                            </button>
+                            <button onClick={() => setMode('planner')} className="group p-6 rounded-2xl border border-slate-200 hover:border-amber-500 hover:shadow-lg hover:shadow-amber-500/10 transition-all text-left bg-white">
+                                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 mb-4"><Calendar size={24}/></div>
+                                <div className="font-bold text-slate-800">Study Planner</div>
+                                <div className="text-xs text-slate-500 mt-1">Create a custom schedule.</div>
+                            </button>
+                             <button onClick={() => setMode('mnemonic')} className="group p-6 rounded-2xl border border-slate-200 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/10 transition-all text-left bg-white">
+                                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-4"><Wand size={24}/></div>
+                                <div className="font-bold text-slate-800">Mnemonics</div>
+                                <div className="text-xs text-slate-500 mt-1">Create memory aids.</div>
+                            </button>
+                        </div>
+                    )}
+
                     {mode === 'quiz' && (
-                        <>
-                            {!qData && !loading && (
+                        <div className="flex-1 flex flex-col">
+                            {!qData ? (
                                 <div className="text-center py-8">
                                     <p className="text-sm text-slate-500 mb-4">Select a topic to generate a unique question.</p>
                                     <div className="flex gap-2 justify-center mb-6 flex-wrap">
@@ -724,68 +1005,97 @@
                                             <button key={t} onClick={() => setTopic(t)} className={`px-3 py-1 rounded-full text-xs font-medium border ${topic === t ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'}`}>{t}</button>
                                         ))}
                                     </div>
-                                    <ModernBtn label="Generate Question" onClick={generateQ} variant="primary" className="w-full max-w-xs mx-auto" icon={Sparkles} />
+                                    <ModernBtn label={loading ? "Generating..." : "Generate Question"} onClick={generateQ} variant="primary" className="w-full max-w-xs mx-auto" icon={Sparkles} disabled={loading}/>
                                 </div>
-                            )}
-
-                            {loading && <div className="py-12 text-center text-sm text-indigo-600 font-medium animate-pulse">Consulting AI Biologist...</div>}
-
-                            {qData && (
-                                <div className="animate-slide-up">
-                                    <div className="text-base font-bold text-slate-800 mb-4">{qData.question}</div>
-                                    <div className="space-y-2 mb-4">
+                            ) : (
+                                <div className="animate-slide-up max-w-2xl mx-auto w-full">
+                                    <div className="flex justify-between text-xs font-bold text-slate-400 mb-2">
+                                        <span>SCORE: {score.correct}/{score.total}</span>
+                                        <span>{quizDifficulty}</span>
+                                    </div>
+                                    <div className="text-lg font-bold text-slate-800 mb-6">{qData.question}</div>
+                                    <div className="space-y-3 mb-6">
                                         {qData.options.map((opt, i) => (
-                                            <button 
-                                                key={i} 
-                                                onClick={() => setSelected(i)}
-                                                disabled={selected !== null}
-                                                className={`w-full text-left p-3 rounded-lg border text-sm transition-all-300
-                                                    ${selected === null 
-                                                        ? 'bg-white border-slate-200 hover:border-indigo-400' 
-                                                        : i === qData.correctIndex 
-                                                            ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-bold' 
-                                                            : i === selected 
-                                                                ? 'bg-rose-50 border-rose-500 text-rose-800' 
-                                                                : 'bg-slate-50 border-slate-200 opacity-50'}
-                                                `}
-                                            >
-                                                {opt}
-                                            </button>
+                                            <button key={i} onClick={() => handleAnswer(i)} disabled={selected !== null} className={`w-full text-left p-4 rounded-xl border transition-all ${selected === null ? 'bg-white hover:border-indigo-400' : i === qData.correctIndex ? 'bg-emerald-50 border-emerald-500 text-emerald-800' : i === selected ? 'bg-rose-50 border-rose-500 text-rose-800' : 'opacity-50'}`}>{opt}</button>
                                         ))}
                                     </div>
                                     {selected !== null && (
                                         <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-sm text-indigo-900 animate-slide-up">
                                             <strong>Explanation:</strong> {qData.explanation}
-                                            <div className="mt-3 text-right">
-                                                <button onClick={generateQ} className="text-xs font-bold text-indigo-700 hover:underline">Next Question &rarr;</button>
-                                            </div>
+                                            <div className="mt-3 text-right"><button onClick={generateQ} className="text-xs font-bold text-indigo-700 hover:underline">Next Question &rarr;</button></div>
                                         </div>
                                     )}
                                 </div>
                             )}
-                        </>
+                        </div>
+                    )}
+
+                    {mode === 'flashcards' && (
+                        <div className="flex-1">
+                             <div className="flex gap-2 mb-6 justify-center flex-wrap">
+                                {['Key Terms', 'Scientists', 'Functions', 'Definitions'].map(t => (
+                                    <button key={t} onClick={() => {setTopic(t); generateFlashcards();}} className={`px-3 py-1 rounded-full text-xs font-bold border ${topic === t ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-600 border-slate-200'}`}>{t}</button>
+                                ))}
+                            </div>
+                            {loading ? <div className="text-center text-teal-600 animate-pulse">Generating Cards...</div> : 
+                             flashcards.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {flashcards.map((card, i) => (
+                                        <div key={i} onClick={() => setFlippedCard(flippedCard === i ? null : i)} className="relative h-48 cursor-pointer group perspective-1000">
+                                            <div className={`absolute inset-0 w-full h-full transition-all duration-500 preserve-3d shadow-sm hover:shadow-md rounded-xl border border-slate-200 ${flippedCard === i ? 'rotate-y-180' : ''}`}>
+                                                <div className="absolute inset-0 backface-hidden bg-white rounded-xl flex items-center justify-center p-4 text-center"><div className="font-bold text-slate-800 text-lg">{card.front}</div></div>
+                                                <div className="absolute inset-0 backface-hidden rotate-y-180 bg-teal-50 rounded-xl flex items-center justify-center p-4 text-center border border-teal-100"><div className="text-sm text-teal-900">{card.back}</div></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                             ) : <div className="text-center mt-10 text-slate-400">Select a category.</div>}
+                        </div>
+                    )}
+
+                    {mode === 'tutor' && (
+                        <div className="flex-1 flex flex-col bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll">
+                                {tutorChat.map((msg, i) => (
+                                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-700'}`}>{msg.text}</div>
+                                    </div>
+                                ))}
+                                {loading && <div className="text-xs text-slate-400 ml-4">Typing...</div>}
+                                <div ref={chatEndRef} />
+                            </div>
+                            <div className="p-3 bg-white border-t border-slate-200 flex gap-2">
+                                <input value={tutorInput} onChange={e => setTutorInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && sendTutorMsg()} placeholder="Type answer..." className="flex-1 bg-slate-50 px-3 py-2 rounded-lg text-sm outline-none" />
+                                <button onClick={sendTutorMsg} className="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Send</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {mode === 'planner' && (
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            {!studyPlan ? (
+                                <div className="w-full max-w-md bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center">
+                                    <h3 className="font-bold text-slate-800 mb-4">Exam Countdown</h3>
+                                    <input type="number" value={daysLeft} onChange={e => setDaysLeft(e.target.value)} className="w-full text-3xl font-bold text-center border-b-2 border-slate-100 py-2 mb-4 outline-none" />
+                                    <ModernBtn label="Generate Plan" onClick={generatePlan} variant="amber" className="w-full" disabled={loading} />
+                                </div>
+                            ) : (
+                                <div className="w-full h-full bg-white p-6 rounded-xl border border-slate-200 overflow-y-auto custom-scroll">
+                                    <div className="flex justify-between mb-4"><h3 className="font-bold">Your Plan</h3><button onClick={() => setStudyPlan(null)} className="text-xs text-amber-600 font-bold">New</button></div>
+                                    <div className="prose prose-sm prose-slate" dangerouslySetInnerHTML={{__html: studyPlan.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>')}}></div>
+                                </div>
+                            )}
+                        </div>
                     )}
 
                     {mode === 'mnemonic' && (
-                        <div className="animate-slide-up">
-                            <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-4">
-                                <h4 className="font-bold text-indigo-800 text-sm mb-2 flex items-center gap-2"><Wand size={16}/> Magic Memory Aid</h4>
-                                <p className="text-xs text-indigo-600 mb-3">Type terms you can't remember (e.g. "Prophase Metaphase Anaphase").</p>
-                                <div className="flex gap-2">
-                                    <input 
-                                        value={mnemonicTopic} 
-                                        onChange={e => setMnemonicTopic(e.target.value)} 
-                                        placeholder="Enter difficult terms..." 
-                                        className="flex-1 bg-white border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-                                    />
-                                    <ModernBtn label="Create" onClick={generateMnemonic} variant="indigo" disabled={loading} />
-                                </div>
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                             <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 text-center w-full max-w-md">
+                                <h4 className="font-bold text-indigo-800 mb-2">Memory Aid Generator</h4>
+                                <input value={mnemonicTopic} onChange={e => setMnemonicTopic(e.target.value)} placeholder="Enter terms to remember..." className="w-full p-2 rounded border border-indigo-200 mb-4 text-sm" />
+                                <ModernBtn label="Create Mnemonic" onClick={generateMnemonic} variant="indigo" className="w-full" disabled={loading} />
+                                {mnemonicRes && <div className="mt-4 bg-white p-4 rounded text-slate-700 text-sm">{mnemonicRes}</div>}
                             </div>
-                            {mnemonicRes && (
-                                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-sm text-slate-700 leading-relaxed animate-slide-up">
-                                    {mnemonicRes}
-                                </div>
-                            )}
                         </div>
                     )}
                 </div>
@@ -804,6 +1114,7 @@
                 { id: 'specific', label: 'Specific Defense', icon: Microscope },
                 { id: 'blood', label: 'Blood & Vaccines', icon: Heart },
                 { id: 'plants', label: 'Plant Defense', icon: Leaf },
+                { id: 'battle', label: 'Battle Mode', icon: Swords },
                 { id: 'exam', label: 'AI Exam Prep', icon: Brain },
             ];
 
@@ -849,18 +1160,21 @@
                             <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 text-slate-600">{menuOpen ? <X size={24}/> : <Menu size={24}/>}</button>
                         </header>
 
-                        <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
-                            <div className="mb-8">
+                        <div className="p-4 md:p-8 max-w-4xl mx-auto w-full h-full flex flex-col">
+                            <div className="mb-8 shrink-0">
                                 <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{menuItems.find(i => i.id === activeTab)?.label}</h1>
                                 <p className="text-slate-500 text-sm">Interactive laboratory simulation module.</p>
                             </div>
 
-                            {activeTab === 'external' && <ZoneExternal />}
-                            {activeTab === 'internal' && <div className="space-y-6"><PhagocytosisLab /><FeverChart /></div>}
-                            {activeTab === 'specific' && <SpecificDefense />}
-                            {activeTab === 'blood' && <BloodLab />}
-                            {activeTab === 'plants' && <PlantLab />}
-                            {activeTab === 'exam' && <AIExamPrep />}
+                            <div className="flex-1">
+                                {activeTab === 'external' && <ZoneExternal />}
+                                {activeTab === 'internal' && <div className="space-y-6"><PhagocytosisLab /><FeverChart /></div>}
+                                {activeTab === 'specific' && <SpecificDefense />}
+                                {activeTab === 'blood' && <BloodLab />}
+                                {activeTab === 'plants' && <PlantLab />}
+                                {activeTab === 'battle' && <BattleArena />}
+                                {activeTab === 'exam' && <AIExamPrep />}
+                            </div>
                         </div>
                     </main>
                 </div>
